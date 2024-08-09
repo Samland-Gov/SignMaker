@@ -2,6 +2,13 @@ const app = (function() {
 	let post = {};
 	let currentlySelectedPanelIndex = -1;
 
+	let fileInfo = {
+
+		fileType: "png",
+		panel: -1,
+
+	};
+
 	/**
 	 * Initialize the application.
 	 */
@@ -52,6 +59,26 @@ const app = (function() {
 		const otherSymbolSelectElement = document.getElementById("otherSymbol");
 		for (const otherSymbol of Sign.prototype.otherSymbols) {
 			lib.appendOption(otherSymbolSelectElement, otherSymbol);
+		}
+
+		//// Export
+		const downloadSign = document.getElementById("downloadSign");
+		const downloadModal = document.getElementById("downloadModal");
+		const downloadClose = document.getElementById("cancelDownload");
+
+		downloadSign.onclick = function() {
+			downloadModal.style.display = "block";
+			updatePreview();
+		}
+
+		downloadClose.onclick = function() {
+			downloadModal.style.display = "none";
+		}
+
+		window.onclick = function(event) {
+			if (event.target == downloadModal) {
+				downloadModal.style.display = "none";
+			}
 		}
 
 		newPanel();
@@ -392,9 +419,12 @@ const app = (function() {
 
 		
 		lib.clearChildren(panelContainerElmt);
+		var index = -1;
 		for (const panel of post.panels) {
+			index++
 			const panelElmt = document.createElement("div");
 			panelElmt.className = `panel ${panel.color.toLowerCase()} ${panel.corner.toLowerCase()}`;
+			panelElmt.id = "panel" + index;
 
 			const exitTabCont = document.createElement("div");
 			exitTabCont.className = `exitTabContainer ${panel.exitTab.position.toLowerCase()} ${panel.exitTab.width.toLowerCase()}`;
@@ -752,6 +782,145 @@ const app = (function() {
 		}
 	};
 
+		/**
+		Download the sign from options
+	*/
+
+	const downloadFile = function(dataURL,ending) {
+		let a = document.createElement(`a`);
+		a.setAttribute("href", dataURL);
+		a.setAttribute("download", "downloadedSign" + ending);
+		a.click();
+		a.remove();
+	}
+
+	function getFile() {
+		var screenshotTarget;
+		var postClass;
+
+		if (fileInfo.panel == -1) {
+			screenshotTarget = document.querySelector("#postContainer");
+		} else {
+			screenshotTarget = document.getElementById("panel" + fileInfo.panel.toString());
+		}
+
+
+		return screenshotTarget;
+	}
+	
+	const saveToPng = async function(file,isPreview,isSVG) {
+		file.style.scale = "2";
+		return new Promise((resolve, reject) => {
+			let svg = htmlToImage.toSvg(file);
+			file.style.scale = "";
+			svg.then(function(dataUrl) {
+				if (isSVG) {
+					if (isPreview) {
+						resolve(dataUrl);
+					}
+					downloadFile(dataUrl,".svg");
+					return;
+				}
+
+				let tmpCanvas = document.createElement("canvas");
+				let ctx = tmpCanvas.getContext("2d");
+			
+				let tmpImg = new Image();
+				tmpImg.addEventListener("load", onTempImageLoad);
+				tmpImg.src = dataUrl;
+			
+				console.log(tmpImg.width, tmpImg.height);
+
+				tmpCanvas.width = tmpCanvas.height = 512;
+
+				// let targetImg = new Image();
+
+				function onTempImageLoad(e) {
+					tmpCanvas.width = e.target.width;
+					tmpCanvas.height = e.target.height;
+
+					ctx.drawImage(e.target, 0, 0);
+					if (isPreview) {
+						resolve(tmpCanvas.toDataURL());
+					} else {
+						downloadFile(tmpCanvas.toDataURL(),".png");
+						resolve(true);
+					}
+				};
+				
+			}).catch(function(error) {
+				console.error("Error Saving!", error);
+			});
+		})
+	}
+
+	const downloadSign = async function() {
+		const downloadPreview = document.getElementById("downloadPreview");
+		const entirePost_option = document.getElementById("entirePost");
+		const panelContainer = document.getElementById("panelContainer");
+		const panelNumberSelector = document.getElementById("singularPanel");
+
+		let background = "";
+
+		if (entirePost_option.checked == true) {
+			fileInfo.panel = -1;
+			panelNumberSelector.style.display = "none";
+			document.getElementById("downloadContents").style.verticalAlign = "10rem";
+		} else {
+			const panelNumber = document.getElementById("selectPanel");
+			fileInfo.panel = (panelNumber.value - 1);
+			panelNumberSelector.style.display = "block";
+			document.getElementById("downloadContents").style.verticalAlign = "";
+		}
+
+		if (fileInfo.fileType == "png") {
+			saveToPng(getFile(),false);
+		} else if (fileInfo.fileType == "svg") {
+			saveToPng(getFile(),false,true);
+		}
+	}
+
+	const updatePreview = async function() {
+		const downloadPreview = document.getElementById("downloadPreview");
+		const entirePost_option = document.getElementById("entirePost");
+		const panelContainer = document.getElementById("panelContainer");
+		const panelNumberSelector = document.getElementById("singularPanel");
+
+		let background = "";
+
+		if (entirePost_option.checked == true) {
+			fileInfo.panel = -1;
+			panelNumberSelector.style.display = "none";
+			document.getElementById("downloadContents").style.verticalAlign = "10rem";
+		} else {
+			const panelNumber = document.getElementById("selectPanel");
+			fileInfo.panel = (panelNumber.value - 1);
+			panelNumberSelector.style.display = "block";
+			document.getElementById("downloadContents").style.verticalAlign = "";
+		}
+		
+		while (downloadPreview.firstChild) {
+			downloadPreview.removeChild(downloadPreview.lastChild);
+		}
+		
+		const targetImg = new Image();
+		targetImg.src = await saveToPng(getFile(),true);
+		downloadPreview.appendChild(targetImg);
+	}
+
+	const updateFileType = function(fileType) {
+		fileInfo.fileType = fileType;
+		updatePreview();
+
+		if (fileType == "png") {
+			document.getElementById("PNG").className = "activated";
+			document.getElementById("SVG").className = "";
+		} else if (fileType == "svg") {
+			document.getElementById("PNG").className = "";
+			document.getElementById("SVG").className = "activated";
+		}
+	}
+
 	return {
 		init : init,
 		newPanel : newPanel,
@@ -761,6 +930,9 @@ const app = (function() {
 		shiftRight : shiftRight,
 		changeEditingPanel : changeEditingPanel,
 		newShield : newShield,
-		readForm : readForm
+		readForm : readForm,
+		downloadSign: downloadSign,
+		updatePreview: updatePreview,
+		updateFileType: updateFileType,
 	};
 })();

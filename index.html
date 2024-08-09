@@ -12,6 +12,7 @@
 		<link href="css/shields.css" rel="stylesheet" type="text/css" />
 		<link href="css/form.css" rel="stylesheet" type="text/css" />
 
+		<script src="js/HtmlToImage.js" type="text/javascript"></script>
 		<script src="js/lib.js" type="text/javascript" ></script>
 		<script src="js/Shield.js" type="text/javascript" ></script>
 		<script src="js/Sign.js" type="text/javascript" ></script>
@@ -20,11 +21,11 @@
 		<script src="js/Post.js" type="text/javascript" ></script>
 		<script src="js/main.js" type="text/javascript" ></script>
 
-		<title>OGF Highway Sign Maker</title>
+		<title>Samland Highway Sign Maker</title>
 	</head>
 	<body onLoad="app.init();">
 		<header>
-			<h1>OGF Sign Maker</h1>
+			<h1>Samland Sign Maker</h1>
 		</header>
 
 		<main>
@@ -102,14 +103,48 @@
 				<label for="actionMessage" id="actionMessageLabel">Action Message: </label>
 				<input type="text" id="actionMessage" name="actionMessage" placeholder="Action Message" onBlur="app.readForm();" />
 				<br />
+				<b class="section">Export</b>
+				<br />
+				<center>
+				  <input type="button" id="downloadSign" value="Download" />
+				</center>
 			</form>
 
+			<div id="downloadModal">
+				<div id="downloadContent">
+					<div id="downloadContents">
+						<center>
+						<b class="section">Download Sign</b>
+						</center>
+						<br />
+						<label for="fileType" id="fileTypeLabel">File Type</label>
+						<input type="button" id="PNG" class="activated" value="PNG" onclick="app.updateFileType(`png`);" />
+						<input type="button" id="SVG" value="SVG" onclick="app.updateFileType(`svg`);" />
+						<br />
+						<label for="entirePost" id="entirePostLabel">Entire Post</label>
+						<input type="checkbox" id="entirePost" name="entirePost" value="entirePost" onChange="app.updatePreview();" checked />
+						<br />
+						<div id="singularPanel">
+							<label for="selectPanel" id="selectPanelLabel">Panel Number</label>
+							<input type="number" id="selectPanel" name="selectPanel" onChange="app.updatePreview();" min=1 step="1" value=1 />
+							<br />
+						</div>
+						<br />
+						<br />
+						<center>
+							<input type="button" id="cancelDownload" value="Cancel" />
+							<input type="button" id="download" value="Download" onclick="app.downloadSign();" />
+						</center>
+					</div>
+					<div id="downloadPreview"></div>
+				</div>
+			</div>
 		</main>
 
 		<footer>
 			<p>Sign Maker</p> 
-			<p>Made by Brendon Strowe; forked and modified by Maplou/dki-os; forked for OGF by infinatious</p>
-			<p><a href="https://github.com/infinatious/SignMaker" target="_blank">Find this on GitHub.</a></p>
+			<p>Made for the Samland Government; forked from OGF-SignMaker</p>
+			<p><a href="https://github.com/Samland-Gov/SignMaker" target="_blank">Find this on GitHub.</a></p>
 		</footer>
 	</body>
 </html>
