@@ -9,6 +9,7 @@ Allows for the creation of highway guide signs in the style defined by the Unite
 ## Modifications have been made for use in Samland
 
 - Image exporting. (From JKPotato-Computer's SignMaker)
+  - With custom image size!
 - Panels have an ID. (From JKPotato-Computer's SignMaker)
 
 ## Acknowledgements

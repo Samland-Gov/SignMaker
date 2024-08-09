@@ -3,10 +3,10 @@ const app = (function() {
 	let currentlySelectedPanelIndex = -1;
 
 	let fileInfo = {
-
 		fileType: "png",
 		panel: -1,
-
+		imageWidth: -1,
+		imageHeight: -1
 	};
 
 	/**
@@ -811,7 +811,12 @@ const app = (function() {
 	const saveToPng = async function(file,isPreview,isSVG) {
 		file.style.scale = "2";
 		return new Promise((resolve, reject) => {
+			let options = {width: fileInfo.imageWidth, height: fileInfo.imageHeight}
 			let svg = htmlToImage.toSvg(file);
+			if (options.width != -1 && options.height != -1) {
+				svg = htmlToImage.toSvg(file, options);
+			}
+
 			file.style.scale = "";
 			svg.then(function(dataUrl) {
 				if (isSVG) {
@@ -886,6 +891,9 @@ const app = (function() {
 		const panelContainer = document.getElementById("panelContainer");
 		const panelNumberSelector = document.getElementById("singularPanel");
 
+		const customSize_option = document.getElementById("customSize");
+		const customSizeSettings = document.getElementById("customSizeSettings");
+
 		let background = "";
 
 		if (entirePost_option.checked == true) {
@@ -897,6 +905,16 @@ const app = (function() {
 			fileInfo.panel = (panelNumber.value - 1);
 			panelNumberSelector.style.display = "block";
 			document.getElementById("downloadContents").style.verticalAlign = "";
+		}
+
+		if (customSize_option.checked == false) {
+			customSizeSettings.style.display = "none";
+			fileInfo.imageHeight = -1;
+			fileInfo.imageWidth = -1;
+		} else {
+			customSizeSettings.style.display = "block";
+			fileInfo.imageHeight = document.getElementById("imageHeight").value;
+			fileInfo.imageWidth = document.getElementById("imageWidth").value;
 		}
 		
 		while (downloadPreview.firstChild) {

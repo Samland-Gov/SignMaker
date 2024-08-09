@@ -130,6 +130,18 @@
 							<br />
 						</div>
 						<br />
+						<label for="customSize" id="customSizeLabel">Custom Image Size</label>
+						<input type="checkbox" id="customSize" name="customSize" value="customSize" onChange="app.updatePreview();" checked />
+						<br />
+						<div id="customSizeSettings">
+							<label for="imageWidth" id="imageWidthLabel">Image Width</label>
+							<input type="number" id="imageWidth" name="imageWidth" onChange="app.updatePreview();" min=1 step="1" value=1 />
+							<br />
+							<label for="imageHeight" id="imageHeightLabel">Image Height</label>
+							<input type="number" id="imageHeight" name="imageHeight" onChange="app.updatePreview();" min=1 step="1" value=1 />
+							<br />
+						</div>
+						<br />
 						<br />
 						<center>
 							<input type="button" id="cancelDownload" value="Cancel" />
